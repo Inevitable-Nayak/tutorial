@@ -6,6 +6,8 @@ import pandas as pd
 import dill
 from sklearn.model_selection import GridSearchCV
 from src.exception import CustomException
+import warnings
+warnings.filterwarnings("ignore")
 def save_object(file_path, obj):
     try:
         dir_path = os.path.dirname(file_path)
@@ -20,8 +22,8 @@ def evaluate_model(x_train, y_train, x_test, y_test, models, params):
         for i in range(len(models)):
             model = list(models.values())[i]
             param = params[list(models.keys())[i]]
-            grid_search = GridSearchCV(model, param, cv=3)
-            # Train model
+            grid_search = GridSearchCV(estimator=model,param_grid=param,cv=3)
+            grid_search.fit(x_train, y_train)
             model.set_params(**grid_search.best_params_)
             model.fit(x_train, y_train)
             # Predict Testing data
@@ -29,9 +31,15 @@ def evaluate_model(x_train, y_train, x_test, y_test, models, params):
             # Predict Training data
             y_train_pred = model.predict(x_train)
             # Evaluate model on training and testing data
-            train_mae, train_rmse, train_r2_square = evaluate_model(y_train, y_train_pred)
-            test_mae, test_rmse, test_r2_square = evaluate_model(y_test, y_test_pred)
+            train_r2_square = r2_score(y_train, y_train_pred)
+            test_r2_square = r2_score(y_test, y_test_pred)
             report[list(models.keys())[i]] = test_r2_square
         return report
     except Exception as e:
         raise CustomException(e, sys)
+def load_data(file_path):
+    try:
+        with(open(file_path,'rb'))  as file_obj:
+            return dill.load(file_obj)
+    except Exception as e:
+        raise CustomException(e, sys)       

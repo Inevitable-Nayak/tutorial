@@ -22,7 +22,7 @@ class DataTransformation:
     def get_data_transformer_object(self):
         try:
             numerical_columns=['reading_score','writing_score']
-            categorical_columns=['gender','race_ethinicity','parental_level_of_education','lunch','test_preparation_course']
+            categorical_columns=['gender','race_ethnicity','parental_level_of_education','lunch','test_preparation_course']
             num_pipeline=Pipeline(
                 steps=[
                     ("imputer",SimpleImputer(strategy='median')),
@@ -33,7 +33,7 @@ class DataTransformation:
                 steps=[
                     ("imputer",SimpleImputer(strategy='most_frequent')),
                     ("onehotencoder",OneHotEncoder()),
-                    ("scaler",StandardScaler())
+                    ("scaler",StandardScaler(with_mean=False))
                 ]
             )
             preprocessor=ColumnTransformer(
@@ -73,3 +73,26 @@ class DataTransformation:
             )
         except Exception as e:
             raise CustomException(e,sys)    
+if __name__ == "__main__":
+    # Step 1: Perform Data Ingestion
+    obj = DataIngestion()
+
+    train_path, test_path = obj.initiate_data_ingestion()
+
+    print("Train Path:", train_path)
+    print("Test Path:", test_path)
+
+    # Step 2: Perform Data Transformation
+    data_transformation = DataTransformation()
+
+    train_arr, test_arr, preprocessor_path = (
+        data_transformation.initiate_data_transformer(
+            train_path,
+            test_path
+        )
+    )
+
+    print("\nData Transformation Completed Successfully!")
+    print("Train Array Shape:", train_arr.shape)
+    print("Test Array Shape:", test_arr.shape)
+    print("Preprocessor Saved At:", preprocessor_path)        
