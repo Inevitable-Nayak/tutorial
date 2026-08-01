@@ -1,4 +1,9 @@
 numpy
 flask
 seaborn
--e .
+pandas
+matplotlib
+scikit-learn
+catboost
+xgboost
+dill
